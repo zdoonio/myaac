@@ -89,13 +89,13 @@ defined('MYAAC') or die('Direct access not allowed!');
 							<td><a href="<?php echo getLink('news'); ?>"><?php echo $config['lua']['serverName']; ?></a> &raquo; <?php echo $title; ?></td>
 							<td>
 							<?php
-							if($status['online'])
-								echo '
+							<?php if (!empty($status['online']) && $status['online']): ?>
 								<span style="color: green"><b>Server Online</b></span> &raquo;
 								Players Online: ' . $status['players'] . ' / ' . $status['playersMax'] . ' &raquo;
 								Monsters: ' . $status['monsters'] . ' &raquo; Uptime: ' . (isset($status['uptimeReadable']) ? $status['uptimeReadable'] : 'Unknown') . '';
-							else
-								echo '<span style="color: red"><b>Server Offline</b></span>';
+							<?php else: ?>
+								<span style="color: green"><b>Server Online</b></span>
+							<?php endif; ?>
 							?>
 							</td>
 						</tr>
