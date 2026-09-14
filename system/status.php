@@ -42,9 +42,9 @@ else if(isset($config['lua']['status_port'])) {
 	$status_port = $config['lua']['status_port'];
 }
 
-// ip check
+// ip check — prefer config.lua over DB default when config specifies a custom host
 $settingIP = setting('core.status_ip');
-if(isset($settingIP[0]))
+if(isset($settingIP[0]) && (!isset($status_ip[0]) || $status_ip === '127.0.0.1'))
 {
 	$status_ip = $settingIP;
 }
@@ -53,10 +53,10 @@ elseif(!isset($status_ip[0])) // try localhost if no ip specified
 	$status_ip = '127.0.0.1';
 }
 
-// port check
+// port check — same logic: prefer config.lua over DB default
 $status_port = $config['lua']['statusPort'];
 $settingPort = setting('core.status_port');
-if(isset($settingPort[0])) {
+if(isset($settingPort[0]) && (!isset($status_port[0]) || $status_port == 7171)) {
 	$status_port = $settingPort;
 }
 elseif(!isset($status_port[0])) // try 7171 if no port specified
