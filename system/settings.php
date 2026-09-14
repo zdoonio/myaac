@@ -147,7 +147,7 @@ return [
 			'name' => 'Meta Description',
 			'type' => 'textarea',
 			'desc' => 'description of the site in ' . escapeHtml('<meta>'),
-			'default' => (config('lua')['serverName'] ?? 'OTServ') . ' is a free massive multiplayer online role playing game (MMORPG).',
+			'default' => config('lua')['serverName'] . ' is a free massive multiplayer online role playing game (MMORPG).',
 		],
 		'meta_keywords' => [
 			'name' => 'Meta Keywords',
@@ -161,17 +161,29 @@ return [
 			'desc' => 'URL of the favicon used in the website',
 			'default' => '/images/favicon.png',
 		],
+		'meta_favicon_type' => [
+			'name' => 'Meta Favicon Type',
+			'type' => 'text',
+			'desc' => 'MIME type of the favicon used in the website',
+			'default' => 'image/png',
+		],
 		'meta_og_description' => [
 			'name' => 'Meta og:description',
 			'type' => 'textarea',
 			'desc' => 'Description used in Open Graph meta tags',
-			'default' => (config('lua')['serverName'] ?? 'OTServ') . ' is a free massive multiplayer online role playing game (MMORPG).',
+			'default' => config('lua')['serverName'] . ' is a free massive multiplayer online role playing game (MMORPG).',
 		],
 		'meta_og_image' => [
 			'name' => 'Meta og:image',
 			'type' => 'text',
 			'desc' => 'URL of the image used in Open Graph meta tags',
 			'default' => '/images/favicon.png',
+		],
+		'meta_og_image_type' => [
+			'name' => 'Meta og:image Type',
+			'type' => 'text',
+			'desc' => 'MIME type of the image used in Open Graph meta tags',
+			'default' => 'image/png',
 		],
 		'meta_og_image_dimensions' => [
 			'name' => 'Meta og:image Dimensions',
@@ -1575,6 +1587,15 @@ Sent by MyAAC,<br/>
 			'min' => 0,
 			'desc' => 'Leave empty to get automatically from config',
 			'default' => 7171,
+			'show_if' => [
+				'status_enabled', '=', 'true',
+			]
+		],
+		'status_proxy' => [
+			'name' => 'Status Proxy URL',
+			'type' => 'text',
+			'desc' => 'HTTP proxy URL for status checks (e.g. http://webproxy:7173). Leave empty to use direct TCP.',
+			'default' => '',
 			'show_if' => [
 				'status_enabled', '=', 'true',
 			]

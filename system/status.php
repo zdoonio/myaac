@@ -113,51 +113,96 @@ function updateStatus() {
 	global $db, $cache, $config, $status, $status_ip, $status_port;
 
 	// get server status and save it to database
-	$serverInfo = new OTS_ServerInfo($status_ip, $status_port);
-	$serverInfo->setTimeout(setting('core.status_timeout'));
+	$proxyUrl = setting('core.status_proxy');
+	if(!empty($proxyUrl)) {
+		$timeout = max(1, intval(setting('core.status_timeout') / 1000));
+		$ch = curl_init($proxyUrl . '/status');
+		curl_setopt_array($ch, [
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_TIMEOUT => $timeout,
+			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_SSL_VERIFYHOST => false,
+		]);
+		$response = curl_exec($ch);
+		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
 
-	$serverStatus = $serverInfo->status();
-	if(!$serverStatus)
-	{
-		$status['online'] = false;
-		$status['players'] = 0;
-		$status['playersMax'] = 0;
-	}
-	else
-	{
-		$status['lastCheck'] = time(); // this should be set only if server respond
-
-		$status['online'] = true;
-		$status['players'] = $serverStatus->getOnlinePlayers(); // counts all players logged in-game, or only connected clients (if enabled on server side)
-		$status['playersMax'] = $serverStatus->getMaxPlayers();
-
-		// for status afk thing
-		if (setting('core.online_afk'))
-		{
-			$status['playersTotal'] = 0;
-			// get amount of players that are currently logged in-game, including disconnected clients (exited)
-			if($db->hasTable('players_online')) { // tfs 1.x
-				$status['playersTotal'] = PlayerOnline::count();
+		if($httpCode === 200 && $response) {
+			$json = json_decode($response, true);
+			if($json && isset($json['xml'])) {
+				$status['lastCheck'] = time();
+				$status['online'] = true;
+				$serverStatus = parseOTAdminXML($json['xml']);
+				if($serverStatus) {
+					$status['players'] = $serverStatus['players'];
+					$status['playersMax'] = $serverStatus['playersMax'];
+					$status['uptime'] = $serverStatus['uptime'];
+					$status['uptimeReadable'] = getStatusUptimeReadable($serverStatus['uptime']);
+					$status['monsters'] = $serverStatus['monsters'];
+					$status['motd'] = $serverStatus['motd'];
+					$status['mapAuthor'] = $serverStatus['mapAuthor'];
+					$status['mapName'] = $serverStatus['mapName'];
+					$status['mapWidth'] = $serverStatus['mapWidth'];
+					$status['mapHeight'] = $serverStatus['mapHeight'];
+					$status['server'] = $serverStatus['server'];
+					$status['serverVersion'] = $serverStatus['serverVersion'];
+					$status['clientVersion'] = $serverStatus['clientVersion'];
+				}
+			} else {
+				$status['online'] = false;
+				$status['players'] = 0;
+				$status['playersMax'] = 0;
 			}
-			else {
-				$status['playersTotal'] = Player::online()->count();
-			}
+		} else {
+			$status['online'] = false;
+			$status['players'] = 0;
+			$status['playersMax'] = 0;
 		}
+	} else {
+		$serverInfo = new OTS_ServerInfo($status_ip, $status_port);
+		$serverInfo->setTimeout(setting('core.status_timeout'));
 
-		$uptime = $status['uptime'] = $serverStatus->getUptime();
-		$status['uptimeReadable'] = getStatusUptimeReadable($uptime);
+		$serverStatusObj = $serverInfo->status();
+		if(!$serverStatusObj)
+		{
+			$status['online'] = false;
+			$status['players'] = 0;
+			$status['playersMax'] = 0;
+		}
+		else
+		{
+			$status['lastCheck'] = time();
 
-		$status['monsters'] = $serverStatus->getMonstersCount();
-		$status['motd'] = $serverStatus->getMOTD();
+			$status['online'] = true;
+			$status['players'] = $serverStatusObj->getOnlinePlayers();
+			$status['playersMax'] = $serverStatusObj->getMaxPlayers();
 
-		$status['mapAuthor'] = $serverStatus->getMapAuthor();
-		$status['mapName'] = $serverStatus->getMapName();
-		$status['mapWidth'] = $serverStatus->getMapWidth();
-		$status['mapHeight'] = $serverStatus->getMapHeight();
+			if (setting('core.online_afk'))
+			{
+				$status['playersTotal'] = 0;
+				if($db->hasTable('players_online')) {
+					$status['playersTotal'] = PlayerOnline::count();
+				}
+				else {
+					$status['playersTotal'] = Player::online()->count();
+				}
+			}
 
-		$status['server'] = $serverStatus->getServer();
-		$status['serverVersion'] = $serverStatus->getServerVersion();
-		$status['clientVersion'] = $serverStatus->getClientVersion();
+			$uptime = $status['uptime'] = $serverStatusObj->getUptime();
+			$status['uptimeReadable'] = getStatusUptimeReadable($uptime);
+
+			$status['monsters'] = $serverStatusObj->getMonstersCount();
+			$status['motd'] = $serverStatusObj->getMOTD();
+
+			$status['mapAuthor'] = $serverStatusObj->getMapAuthor();
+			$status['mapName'] = $serverStatusObj->getMapName();
+			$status['mapWidth'] = $serverStatusObj->getMapWidth();
+			$status['mapHeight'] = $serverStatusObj->getMapHeight();
+
+			$status['server'] = $serverStatusObj->getServer();
+			$status['serverVersion'] = $serverStatusObj->getServerVersion();
+			$status['clientVersion'] = $serverStatusObj->getClientVersion();
+		}
 	}
 
 	if($cache->enabled()) {

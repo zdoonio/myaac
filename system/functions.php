@@ -552,16 +552,11 @@ function template_header($is_admin = false): string
 	global $title_full, $twig;
 	$charset = setting('core.charset') ?? 'utf-8';
 
-	$favicon = setting('core.meta_favicon') ?? '/images/favicon.png';
-
 	return $twig->render('templates.header.html.twig',
 		[
 			'charset' => $charset,
 			'title' => $title_full,
-			'is_admin' => $is_admin,
-			'favicon' => $favicon,
-			'faviconType' => getImageMimeTypeByExtension($favicon),
-			'ogImageType' => getImageMimeTypeByExtension(setting('core.meta_og_image') ?? '/images/favicon.png'),
+			'is_admin' => $is_admin
 		]
 	);
 }
@@ -1791,10 +1786,31 @@ function getStatusUptimeReadable(int $uptime): string
 	return "{$y}{$m}{$d}{$hours}h {$min}m";
 }
 
-function getImageMimeTypeByExtension(string $imagePath): ?string
-{
-	$extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
-	return IMAGES_MIME_TYPES[$extension] ?? null;
+function parseOTAdminXML(string $xml): ?array {
+	$parser = xml_parser_create('UTF-8');
+	xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+	xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+	$data = xml_parse($parser, $xml, true);
+	xml_parser_free($parser);
+	if(!$data) return null;
+
+	$result = simplexml_load_string($xml);
+	if(!$result) return null;
+
+	$out = [];
+	$out['players']      = (int) ($result->players ?? 0);
+	$out['playersMax']   = (int) ($result->maxplayers ?? 0);
+	$out['uptime']       = (int) ($result->uptime ?? 0);
+	$out['monsters']     = (int) ($result->monsters ?? 0);
+	$out['motd']         = (string) ($result->motd ?? '');
+	$out['mapAuthor']    = (string) ($result->mapauthor ?? '');
+	$out['mapName']      = (string) ($result->mapname ?? '');
+	$out['mapWidth']     = (int) ($result->mapwidth ?? 0);
+	$out['mapHeight']    = (int) ($result->mapheight ?? 0);
+	$out['server']       = (string) ($result->server ?? '');
+	$out['serverVersion']= (string) ($result->serverversion ?? '');
+	$out['clientVersion']= (string) ($result->clientversion ?? '');
+	return $out;
 }
 
 function is_sub_dir(?string $path = NULL, string $parent_folder = BASE): bool|string
