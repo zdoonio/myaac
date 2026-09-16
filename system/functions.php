@@ -1798,6 +1798,30 @@ function parseOTAdminXML(string $xml): ?array {
 	if(!$result) return null;
 
 	$out = [];
+
+	// TFS/OTAdmin (tsqp) format: values live in attributes
+	if(isset($result->serverinfo) || isset($result->players)) {
+		$serverInfo = $result->serverinfo ?? null;
+		$players = $result->players ?? null;
+		$monsters = $result->monsters ?? null;
+		$map = $result->map ?? null;
+
+		$out['players']      = (int) ($players['online'] ?? 0);
+		$out['playersMax']   = (int) ($players['max'] ?? 0);
+		$out['uptime']       = (int) ($serverInfo['uptime'] ?? 0);
+		$out['monsters']     = (int) ($monsters['total'] ?? 0);
+		$out['motd']         = (string) ($result->motd ?? '');
+		$out['mapAuthor']    = (string) ($map['author'] ?? '');
+		$out['mapName']      = (string) ($map['name'] ?? '');
+		$out['mapWidth']     = (int) ($map['width'] ?? 0);
+		$out['mapHeight']    = (int) ($map['height'] ?? 0);
+		$out['server']       = (string) ($serverInfo['server'] ?? '');
+		$out['serverVersion']= (string) ($serverInfo['version'] ?? '');
+		$out['clientVersion']= (string) ($serverInfo['client'] ?? '');
+		return $out;
+	}
+
+	// legacy element-based format
 	$out['players']      = (int) ($result->players ?? 0);
 	$out['playersMax']   = (int) ($result->maxplayers ?? 0);
 	$out['uptime']       = (int) ($result->uptime ?? 0);
