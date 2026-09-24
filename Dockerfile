@@ -12,4 +12,11 @@ RUN apt-get update && apt-get install -y \
         gd \
         zip \
         mysqli \
+    && a2enmod rewrite \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# mod_rewrite jest wymagany: .htaccess w korzeniu MyAAC używa RewriteEngine,
+# a obraz php:apache ustawia AllowOverride All (docker-php.conf), więc bez
+# tego modułu Apache odrzuca CAŁY katalog kodem 500. Włączenie przez
+# `docker exec a2enmod` jest ulotne — znika przy odtworzeniu kontenera.
+
