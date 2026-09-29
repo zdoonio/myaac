@@ -27,6 +27,11 @@ class Items
 			return false;
 		}
 
+		// This parses every item of a ~3 MB file with DOM, which measures ~22 s
+		// on the project's stack -- uncomfortably close to PHP's 30 s default
+		// when it runs inside a request rather than from an installer.
+		set_time_limit(120);
+
 		$xml = new \DOMDocument;
 		$xml->load($file_path);
 
@@ -72,6 +77,14 @@ class Items
 
 		$cache_php = new CachePHP(config('cache_prefix'), CACHE . 'persistent/');
 		self::$items = $cache_php->get('items');
+
+		// The cache is only ever filled by loadFromXML(), which nothing calls at
+		// runtime -- so after an install or a cache wipe every item tooltip and
+		// every loot name silently went blank. Rebuild it on the spot instead.
+		if(empty(self::$items)) {
+			self::loadFromXML();
+			self::$items = $cache_php->get('items');
+		}
 	}
 
 	public static function get($id) {
