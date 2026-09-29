@@ -1,0 +1,17 @@
+{
+	"name": "New Account Coins",
+	"description": "Gives every newly created account a starting balance of tibia coins (1000 by default, or whatever the core.new_account_coins setting says).",
+	"version": "1.0",
+	"author": "Elysia",
+	"contact": "",
+	"hooks": {
+		"new-account-coins": {
+			"type": "ACCOUNT_CREATE_AFTER_SAVED",
+			"file": "plugins/new-account-coins/coins.php"
+		}
+	},
+	"uninstall": [
+		"plugins/new-account-coins.json",
+		"plugins/new-account-coins"
+	]
+}
