@@ -96,6 +96,14 @@ $twig->display('monsters.back_button.html.twig');
 
 function getMonsterImage($monster): string
 {
+	// A portrait generated from our own client files wins over the remote
+	// outfit service: it needs no network, and it cannot disagree with the
+	// client the players actually run (tools/gen_monster_images.py).
+	$local = getMonsterImgPath($monster['name']);
+	if(!str_contains($local, 'nophoto')) {
+		return $local;
+	}
+
 	$outfit = json_decode($monster['look'], true);
 
 	if (!empty($outfit['typeEx'])) {
@@ -111,7 +119,7 @@ function getMonsterImage($monster): string
 		return setting('core.outfit_images_url') . '?id=' . $outfit['type'] . $getValue('addons') . $getValue('head') . $getValue('body') . $getValue('legs') . $getValue('feet');
 	}
 
-	return getMonsterImgPath($monster['name']);
+	return $local;
 }
 
 function getMonsterImgPath($name): string
