@@ -110,7 +110,7 @@ function getMonsterImage($monster): string
 		return setting('core.item_images_url') . $outfit['typeEx'] . setting('core.item_images_extension');
 	}
 
-	if (isset($outfit['type'])) {
+	if (!empty($outfit['type'])) {
 		$getValue = function ($val) use ($outfit) {
 			return (!empty($outfit[$val])
 				? '&' . $val . '=' . $outfit[$val] : '');
