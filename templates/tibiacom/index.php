@@ -436,7 +436,7 @@ foreach($config['menu_categories'] as $id => $cat) {
         </div>
         <div id="ThemeboxesColumn">
           <div id="RightArtwork">
-            <img id="Monster" src="images/monsters/<?php echo logo_monster() ?>.gif" onClick="window.location = '?subtopic=creatures&creature=<?php echo $config['logo_monster'] ?>';" alt="Monster of the Week" />
+            <img id="Monster" src="images/monsters/<?php echo logo_monster() ?><?php echo setting('core.monsters_images_extension') ?>" onClick="window.location = '?subtopic=creatures&creature=<?php echo $config['logo_monster'] ?>';" alt="Monster of the Week" />
             <img id="PedestalAndOnline" src="<?php echo $template_path; ?>/images/header/pedestal-and-online.gif" alt="Monster Pedestal and Players Online Box"/>
           <div id="PlayersOnline" onClick="window.location = '<?php echo getLink('online'); ?>'">
 		  <?php
@@ -475,5 +475,17 @@ foreach($config['menu_categories'] as $id => $cat) {
 function logo_monster()
 {
 	global $config;
-	return str_replace(" ", "", trim(strtolower($config['logo_monster'])));
+
+	$name = str_replace(" ", "", trim(strtolower($config['logo_monster'])));
+	$extension = setting('core.monsters_images_extension');
+
+	// This used to be a hardcoded .gif that shipped with the template. The
+	// portraits are generated from our own client files now and carry whatever
+	// extension core.monsters_images_extension says, so follow the setting and
+	// fall back to the placeholder when the chosen monster has no picture.
+	if (!file_exists(BASE . 'images/monsters/' . $name . $extension)) {
+		return 'nophoto';
+	}
+
+	return $name;
 }
