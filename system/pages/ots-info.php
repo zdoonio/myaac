@@ -78,7 +78,35 @@ $clientVersion = NULL;
 if(isset($status['online']))
     $clientVersion = isset($status['clientVersion']) ? $status['clientVersion'] : null;
 
+// T317: skill and magic level narrow with level, so a single "x3" would be true
+// only at the start. The ladders come from data/XML/elysia_rates.xml, which
+// tools/seed_content.py writes straight from config.lua.
+$rateRanges = [];
+$ratesFile = $config['data_path'] . 'XML/elysia_rates.xml';
+if(file_exists($ratesFile)) {
+	$rates = new DOMDocument();
+	$rates->load($ratesFile);
+
+	foreach(['experience' => 'expRange', 'skill' => 'skillRange', 'magic' => 'magicRange'] as $nodeName => $varName) {
+		$node = $rates->getElementsByTagName($nodeName)->item(0);
+		if(!$node)
+			continue;
+
+		$multipliers = [];
+		foreach($node->getElementsByTagName('stage') as $stage) {
+			/** @var DOMElement $stage */
+			$multipliers[] = (float) $stage->getAttribute('multiplier');
+		}
+
+		if(count($multipliers) > 1)
+			$rateRanges[$varName] = 'x' . max($multipliers) . ' - x' . min($multipliers);
+	}
+}
+
 $twig->display('serverinfo.html.twig', array(
+    'expRange' => isset($rateRanges['expRange']) ? $rateRanges['expRange'] : null,
+    'skillRange' => isset($rateRanges['skillRange']) ? $rateRanges['skillRange'] : null,
+    'magicRange' => isset($rateRanges['magicRange']) ? $rateRanges['magicRange'] : null,
     'experienceStages' => isset($config['lua']['experienceStages']) && getBoolean($config['lua']['experienceStages']) ? $config['lua']['experienceStages'] : null,
     'serverIp' => str_replace('/', '', str_replace('http://', '', $config['lua']['url'])),
     'clientVersion' => $clientVersion,

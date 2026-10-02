@@ -32,10 +32,14 @@
     {%  if rateExpFromPlayers %}
         <li>Exp Rate from Players: <b>x{{ rateExpFromPlayers }}</b></li>
     {%  endif %}
-    {%  if rateMagic is defined %}
+    {%  if magicRange %}
+    <li>Magic Level: <b>{{ magicRange }}</b> (stages, see the Exp Stages page)</li>
+    {%  elseif rateMagic is defined %}
     <li>Magic Level: <b>x{{ rateMagic }}</b></li>
     {%  endif %}
-    {%  if rateSkill is defined %}
+    {%  if skillRange %}
+    <li>Skills: <b>{{ skillRange }}</b> (stages, see the Exp Stages page)</li>
+    {%  elseif rateSkill is defined %}
     <li>Skills: <b>x{{ rateSkill }}</b></li>
     {% endif %}
     {%  if rateLoot is defined %}
