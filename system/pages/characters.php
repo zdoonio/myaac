@@ -201,6 +201,53 @@ if($player->isLoaded() && !$player->isDeleted())
 		unset($storage);
 	}
 
+	// Achievements [T314]. The server has no table for these: Player.addAchievement
+	// writes player_storage[300000 + id] = os.time() on the running world
+	// (data/lib/core/achievements.lua), so the id range is the whole story. The
+	// id -> name/grade/points map is generated from the same Lua file by
+	// tools/gen_achievements_php.py; unknown keys are skipped rather than guessed.
+	$achievements = array();
+	$achievements_total = 0;
+	$achievements_points = 0;
+	$achievements_points_total = 0;
+	$achievements_data_file = __DIR__ . '/../achievements_data.php';
+	if(is_file($achievements_data_file)) {
+		$achievement_defs = require $achievements_data_file;
+		if(is_array($achievement_defs) && !empty($achievement_defs)) {
+			$achievements_total = count($achievement_defs);
+			$achievements_base = 300000; // PlayerStorageKeys.achievementsBase
+			foreach($achievement_defs as $def)
+				$achievements_points_total += $def['points'];
+
+			$first_id = min(array_keys($achievement_defs));
+			$last_id = max(array_keys($achievement_defs));
+			$ach_sql = $db->query('SELECT `key`, `value` FROM `player_storage` WHERE `player_id` = '.$player->getId()
+				.' AND `key` >= '.($achievements_base + $first_id).' AND `key` <= '.($achievements_base + $last_id));
+
+			$owned = array();
+			foreach($ach_sql as $row) {
+				$id = (int) $row['key'] - $achievements_base;
+				if($row['value'] > 0 && isset($achievement_defs[$id]))
+					$owned[$id] = (int) $row['value'];
+			}
+
+			foreach($owned as $id => $granted_at) {
+				$def = $achievement_defs[$id];
+				$achievements[] = array(
+					'name' => $def['name'],
+					'grade' => $def['grade'],
+					'points' => $def['points'],
+					'secret' => $def['secret'],
+					'date' => $granted_at,
+				);
+				$achievements_points += $def['points'];
+			}
+
+			// Newest first: the storage value is the grant timestamp.
+			usort($achievements, function($a, $b) { return $b['date'] - $a['date']; });
+		}
+	}
+
 	if ($db->hasTableAndColumns('player_items', ['pid', 'sid', 'itemtype'])) {
 		$eq_sql = $db->query('SELECT `pid`, `itemtype` FROM player_items WHERE player_id = '.$player->getId().' AND (`pid` >= 1 and `pid` <= 10)');
 		$equipment = [];
@@ -421,6 +468,10 @@ WHERE killers.death_id = '".$death['id']."' ORDER BY killers.final_hit DESC, kil
 		'skills' => isset($skills) ? $skills : null,
 		'quests_enabled' => $quests_enabled,
 		'quests' => isset($quests) ? $quests : null,
+		'achievements' => $achievements,
+		'achievements_total' => $achievements_total,
+		'achievements_points' => $achievements_points,
+		'achievements_points_total' => $achievements_points_total,
 		'equipment' => isset($equipment) ? $equipment : null,
 		'skull' => $player->getSkullTime() > 0 && ($player->getSkull() == 4 || $player->getSkull() == 5) ? $skulls[$player->getSkull()] : null,
 		'deaths' => $deaths,
