@@ -29,10 +29,10 @@ if (is_file($manifestPath)) {
 	if (is_array($decoded)) {
 		$builds = $decoded;
 	} else {
-		$errors[] = 'client-downloads/manifest.json nie jest poprawnym JSON-em.';
+		$errors[] = 'client-downloads/manifest.json is not valid JSON.';
 	}
 } else {
-	$errors[] = 'Brak opublikowanych paczek klienta (client-downloads/manifest.json nie istnieje).';
+	$errors[] = 'No client package has been published yet (client-downloads/manifest.json is missing).';
 }
 
 // MyAAC has no size formatter; the page needs one line of it.
@@ -54,7 +54,7 @@ foreach ($builds as $build) {
 
 	$path = $dir . basename($build['file']);
 	if (!is_file($path)) {
-		$errors[] = sprintf('%s jest w manifeście, ale pliku %s nie ma w client-downloads/.',
+		$errors[] = sprintf('%s is listed in the manifest but %s is not in client-downloads/.',
 			$build['name'], basename($build['file']));
 		continue;
 	}
