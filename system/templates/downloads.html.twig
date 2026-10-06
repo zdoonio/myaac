@@ -1,0 +1,48 @@
+{% if errors|length > 0 %}
+	<div class="error" style="padding: 6px 8px; margin-bottom: 10px;">
+		{% for error in errors %}
+			{{ error }}<br/>
+		{% endfor %}
+	</div>
+{% endif %}
+
+{% if builds|length > 0 %}
+	<table border="0" cellspacing="1" cellpadding="4" width="100%">
+		<tr bgcolor="{{ config.vdarkborder }}">
+			<td width="30%"><span class="white"><b>Klient</b></span></td>
+			<td width="15%"><span class="white"><b>System</b></span></td>
+			<td width="15%"><span class="white"><b>Rozmiar</b></span></td>
+			<td width="15%"><span class="white"><b>Data</b></span></td>
+			<td><span class="white"><b>Pobierz</b></span></td>
+		</tr>
+		{% set i = 0 %}
+		{% for build in builds %}
+		<tr bgcolor="{{ getStyle(i) }}">
+			<td>{{ build.name }}</td>
+			<td>{{ build.platform|default('-') }}</td>
+			<td>{{ build.size }}</td>
+			<td>{{ build.date }}</td>
+			<td><a href="{{ build.url }}">pobierz</a>{% if build.note is defined and build.note %} &mdash; {{ build.note }}{% endif %}</td>
+		</tr>
+		{% set i = i + 1 %}
+		{% endfor %}
+	</table>
+{% else %}
+	<p>Nie ma jeszcze opublikowanej paczki klienta do pobrania.</p>
+{% endif %}
+
+{% if webclient_url %}
+	<h3>Klient przeglądarkowy</h3>
+	<p>
+		Nie chcesz nic instalować? Ta sama gra działa w przeglądarce:
+		<a href="{{ webclient_url }}">{{ webclient_url }}</a>
+	</p>
+{% endif %}
+
+<h3>Jak zacząć</h3>
+<ul>
+	<li>Pobierz paczkę dla swojego systemu i rozpakuj ją do własnego katalogu.</li>
+	<li>Uruchom klienta i zaloguj się swoim kontem — adres serwera jest już wpisany w paczce.</li>
+	<li>Klient jest naszą kompilacją AstraClienta: tylko ona obsługuje wszystkie funkcje serwera
+		(ikony rzadkich potworów, market, okno forge, wheel).</li>
+</ul>

@@ -1,0 +1,5 @@
+# Paczki klienta są binarne i duże — w repo zostaje tylko manifest i README.
+*.zip
+*.7z
+*.tar.gz
+*.exe
