@@ -245,7 +245,16 @@ if(!empty($page) && preg_match('/^[A-z0-9\/\-]+$/', $page)) {
 	if (!$foundRoute) {
 		$file = loadPageFromFileSystem($page, $found);
 		if(!$found) {
-			$file = false;
+			// Database pages (myaac_pages) only reach this branch through the `routes_final`
+			// cache, which is never written when the cache is off -- so ask the database
+			// directly instead. See DECISIONS D114.
+			if(!empty($page) && in_array($page, getDatabasePages(), true)) {
+				$file = '__database__/' . $page;
+				$found = true;
+			}
+			else {
+				$file = false;
+			}
 		}
 	}
 }
@@ -328,6 +337,25 @@ else {
 
 			unset($tmp, $uri);
 			break;
+	}
+}
+
+// Database pages live behind the pseudo-route `__database__/<name>`. The dispatcher branch renders
+// them itself, but the old `?subtopic=` branch only assigned that pseudo-path to `$file` and let
+// `require` fail on it. Render them in one place for both branches. See DECISIONS D114.
+if(is_string($file) && str_starts_with($file, '__database__/')) {
+	$pageName = str_replace('__database__/', '', $file);
+	$success = false;
+	$tmp_content = getCustomPage($pageName, $success);
+	if($success && $hooks->trigger(HOOK_BEFORE_PAGE_CUSTOM)) {
+		$content .= $tmp_content;
+		$hooks->trigger(HOOK_AFTER_PAGE_CUSTOM);
+		$page = $pageName;
+		$file = false;
+	}
+	else {
+		$file = false;
+		$found = false;
 	}
 }
 
