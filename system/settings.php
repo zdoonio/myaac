@@ -55,6 +55,12 @@ return [
 			'default' => IS_CLI ? '' : $siteURL,
 			'is_config' => true,
 		],
+		'webclient_url' => [
+			'name' => 'Web Client URL',
+			'type' => 'text',
+			'desc' => 'Address of the browser client - the Downloads page links it as "Play in your browser"',
+			'default' => '',
+		],
 		'env' => [
 			'name' => 'App Environment',
 			'type' => 'options',
