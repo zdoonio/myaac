@@ -1,5 +1,6 @@
 <?php
 
+use MyAAC\Models\Settings as ModelsSettings;
 use MyAAC\Settings;
 
 function updateHighscoresIdsHidden(): void
@@ -15,9 +16,24 @@ function updateHighscoresIdsHidden(): void
 	$highscores_ignored_ids = array();
 	if ($query->rowCount() > 0) {
 		foreach ($query->fetchAll() as $result)
-			$highscores_ignored_ids[] = $result['id'];
+			$highscores_ignored_ids[] = (int)$result['id'];
 	} else {
 		$highscores_ignored_ids[] = 0;
+	}
+
+	// Add to the ids that are already hidden, never replace them. This setting is
+	// curated: besides the samples above it carries the staff and the test
+	// characters (Elysia hides 15 rows, written by tools/seed_site.py), and this
+	// migration runs again for every database that falls behind -- replacing the
+	// whole value silently put the staff back into the highscores.
+	$current = ModelsSettings::where(['name' => 'core', 'key' => 'highscores_ids_hidden'])->first();
+	if ($current) {
+		foreach (explode(',', (string)$current->value) as $id) {
+			$id = (int)trim($id);
+			if ($id > 0 && !in_array($id, $highscores_ignored_ids, true)) {
+				$highscores_ignored_ids[] = $id;
+			}
+		}
 	}
 
 	$settings = Settings::getInstance();
