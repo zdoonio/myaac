@@ -22,11 +22,10 @@ class Weapons {
 	{
 		global $config;
 
-		try {
-			Weapon::query()->delete();
-		} catch (\PDOException $error) {
-		}
-
+		// Read the source BEFORE deleting anything: a missing or malformed
+		// weapons.xml used to empty the table first and fail second, the same
+		// way a stray hit on install/tools/7-finish.php wiped spells and
+		// monsters.
 		$file_path = $config['data_path'] . 'weapons/weapons.xml';
 		if (!file_exists($file_path)) {
 			self::$error = 'Cannot load file ' . $file_path;
@@ -34,7 +33,15 @@ class Weapons {
 		}
 
 		$xml = new \DOMDocument;
-		$xml->load($file_path);
+		if (!@$xml->load($file_path)) {
+			self::$error = 'Cannot load file ' . $file_path;
+			return false;
+		}
+
+		try {
+			Weapon::query()->delete();
+		} catch (\PDOException $error) {
+		}
 
 		foreach ($xml->getElementsByTagName('wand') as $weapon) {
 			self::parseNode($weapon, $show);

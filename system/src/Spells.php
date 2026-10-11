@@ -36,6 +36,19 @@ class Spells {
 		public static function loadFromXML($show = false) {
 		global $config;
 
+		// Read the source BEFORE deleting anything. This distro keeps spells as
+		// RevScripts (data/scripts/spells/spells.xml), so the classic path below
+		// does not exist here and the constructor throws. The old order deleted
+		// every row first and only then failed, which left the Spells page empty
+		// -- and a public hit on install/tools/7-finish.php was enough to do it.
+		try {
+			self::$spellsList = new \OTS_SpellsList($config['data_path'].'spells/spells.xml');
+		}
+		catch(\Exception $e) {
+			self::$lastError = $e->getMessage();
+			return false;
+		}
+
 		try {
 			Spell::query()->delete();
 		} catch(\Exception $error) {}
@@ -43,14 +56,6 @@ class Spells {
 		if($show) {
 			echo '<h2>Reload spells.</h2>';
 			echo '<h2>All records deleted from table <b>' . TABLE_PREFIX . 'spells</b> in database.</h2>';
-		}
-
-		try {
-			self::$spellsList = new \OTS_SpellsList($config['data_path'].'spells/spells.xml');
-		}
-		catch(\Exception $e) {
-			self::$lastError = $e->getMessage();
-			return false;
 		}
 
 		//add conjure spells
