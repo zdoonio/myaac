@@ -3,12 +3,12 @@
     "name": "Elysia Client — Windows (x64)",
     "platform": "Windows 10/11",
     "file": "win-x64.zip",
-    "note": "Recommended. Client version 8.6. Run Start-Elysia.bat — it starts the connection bridge and then the client. Use \"Another\" in the server list to type a different address."
+    "note": "Recommended. Client version 8.6, connects to elysia.pl. Use \"Another\" in the server list to type a different address."
   },
   {
     "name": "Elysia Client — Linux (x86-64)",
     "platform": "Debian 13 / Ubuntu 24.04+",
     "file": "linux-x64.zip",
-    "note": "Unpack and run ./run.sh — it checks the system libraries and starts the connection bridge. Requires glibc 2.38 or newer."
+    "note": "Unpack and run ./run.sh — it checks the system libraries the client needs. Requires glibc 2.38 or newer."
   }
 ]
