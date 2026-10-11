@@ -9,6 +9,6 @@
     "name": "Elysia Client — Windows (x64)",
     "platform": "Windows 10/11",
     "file": "win-x64.zip",
-    "note": "Recommended. Client version 8.6, connects to elysia.playit.plus. Use \"Another\" in the server list to type a different address."
+    "note": "Recommended. Client version 8.6, connects to game.elysia.pl. Use \"Another\" in the server list to type a different address."
   }
 ]
