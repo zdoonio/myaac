@@ -22,6 +22,7 @@ return [
 		'Guilds' => 'guilds',
 		'Bans' => 'bans',
 		'Support List' => 'team',
+		'Discord' => 'discord',
 	],
 	MENU_CATEGORY_FORUM => [
 		'Forum' => 'forum',

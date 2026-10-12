@@ -51,13 +51,29 @@ $action = $request->type ?? '';
 switch ($action) {
 	case 'cacheinfo':
 		$playersonline = PlayerOnline::count();
-		die(json_encode([
+		$cacheinfo = [
 			'playersonline' => $playersonline,
 			'twitchstreams' => 0,
 			'twitchviewer' => 0,
 			'gamingyoutubestreams' => 0,
 			'gamingyoutubeviewer' => 0
-		]));
+		];
+
+		// T491: the Discord button in our clients reads
+		// `discord_link` (what to open) and `discord_online` (what to show on the
+		// label) from this response. Both are best effort: a missing field leaves
+		// the button on its built-in default, and a slow widget must never delay
+		// a client logging in (the fetch is cached and times out after 2 s).
+		$discordLink = setting('core.discord_link');
+		if (!empty($discordLink)) {
+			$cacheinfo['discord_link'] = $discordLink;
+		}
+		$discordOnline = discord_widget_presence();
+		if ($discordOnline !== null) {
+			$cacheinfo['discord_online'] = $discordOnline . ' online on Discord';
+		}
+
+		die(json_encode($cacheinfo));
 
 	case 'eventschedule':
 		$eventlist = [];

@@ -73,6 +73,18 @@ return [
 			'desc' => 'Login port of the connect address (42694)',
 			'default' => '',
 		],
+		'discord_link' => [
+			'name' => 'Discord Invite',
+			'type' => 'text',
+			'desc' => 'Invite to our Discord - the Discord page, the client button and the in-game notice all read it (T491)',
+			'default' => '',
+		],
+		'discord_guild_id' => [
+			'name' => 'Discord Server ID',
+			'type' => 'text',
+			'desc' => 'Guild id of our Discord - the page embeds its widget and cacheinfo reads its online count (T491)',
+			'default' => '',
+		],
 		'env' => [
 			'name' => 'App Environment',
 			'type' => 'options',
