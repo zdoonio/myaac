@@ -11,7 +11,7 @@
 
 <ul>
     <h2>Server Info:</h2>
-    <li>IP: <b>{{ serverIp }}</b> (Port: <b>{{ config.lua.loginPort }}</b>)</li>
+    <li>IP: <b>{{ connectHost }}</b> (Port: <b>{{ connectPort }}</b>)</li>
     {%  if clientVersion %}
     <li>Client: <b>{{ clientVersion }}</b></li>
     {%  endif %}
@@ -26,16 +26,22 @@
     {%  endif %}
 
     <h2>Rates</h2>
-    {%  if rateExp is defined %}
+    {%  if expRange %}
+    <li>Exp Rate: <b>{{ expRange }}</b> (stages, see the Exp Stages page)</li>
+    {%  elseif rateExp is defined %}
     <li>Exp Rate: <b>x{{ rateExp }}</b></li>
     {%  endif %}
     {%  if rateExpFromPlayers %}
         <li>Exp Rate from Players: <b>x{{ rateExpFromPlayers }}</b></li>
     {%  endif %}
-    {%  if rateMagic is defined %}
+    {%  if magicRange %}
+    <li>Magic Level: <b>{{ magicRange }}</b> (stages, see the Exp Stages page)</li>
+    {%  elseif rateMagic is defined %}
     <li>Magic Level: <b>x{{ rateMagic }}</b></li>
     {%  endif %}
-    {%  if rateSkill is defined %}
+    {%  if skillRange %}
+    <li>Skills: <b>{{ skillRange }}</b> (stages, see the Exp Stages page)</li>
+    {%  elseif rateSkill is defined %}
     <li>Skills: <b>x{{ rateSkill }}</b></li>
     {% endif %}
     {%  if rateLoot is defined %}

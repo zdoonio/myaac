@@ -72,6 +72,7 @@ $twig->display('spells.html.twig', array(
 	'post_vocation' => $vocation,
 	'spells' => $spells,
 	'item_path' => setting('core.item_images_url'),
+	'item_extension' => setting('core.item_images_extension'),
 ));
 ?>
 

@@ -132,11 +132,11 @@
 								<small>
 									{% if (spell.conjure_count < 150) and ( spell.conjure_count > 0) %} {{ spell.conjure_count }}x
 										<br/>{% endif %}</small>
-								<img src="{{ item_path }}/{{ spell.conjure_id }}.gif"
+								<img src="{{ item_path }}{{ spell.conjure_id }}{{ item_extension }}"
 									 width="32" height="32" border="0"
 									 alt="{{ spell.conjure_id }}"></td>
 							<td>{% if (spell.reagent > 0) %}
-									<img src="{{ item_path }}/{{ spell.reagent }}.gif"
+									<img src="{{ item_path }}{{ spell.reagent }}{{ item_extension }}"
 										 width="32" height="32" border="0"
 										 alt="{{ spell.reagent }}">{% else %}---{% endif %}</td>
 							<td>
@@ -173,7 +173,7 @@
 							<td>{{ spell.name }}</td>
 							<td>{{ spell.level }}</td>
 							<td>{{ spell.maglevel }}</td>
-							<td><img src="{{ item_path }}/{{ spell.item_id }}.gif"
+							<td><img src="{{ item_path }}{{ spell.item_id }}{{ item_extension }}"
 									 width="32" height="32" border="0"
 									 alt="{{ spell.item_id }}"></td>
 							<td>

@@ -59,4 +59,37 @@ foreach($stages->getElementsByTagName('stage') as $stage)
 	];
 }
 
-$twig->display('experience_stages.html.twig', ['stages' => $stagesArray]);
+// T317: the full ladders, not just the first rung - skill and magic level narrow
+// with level, and a single "skills x3" would be true only up to skill 30.
+// tools/seed_content.py writes this file straight from config.lua.
+$rateSections = [];
+$ratesFile = $config['data_path'] . 'XML/elysia_rates.xml';
+if(file_exists($ratesFile)) {
+	$rates = new DOMDocument();
+	$rates->load($ratesFile);
+
+	foreach(['experience' => 'Experience stages', 'skill' => 'Skill stages',
+	         'magic' => 'Magic level stages'] as $nodeName => $sectionTitle) {
+		$node = $rates->getElementsByTagName($nodeName)->item(0);
+		if(!$node)
+			continue;
+
+		$list = [];
+		foreach($node->getElementsByTagName('stage') as $stage) {
+			/** @var DOMElement $stage */
+			$maxLevel = $stage->getAttribute('maxlevel');
+			$list[] = [
+				'levels' => $stage->getAttribute('minlevel') . (isset($maxLevel[0]) ? '-' . $maxLevel : '+'),
+				'multiplier' => $stage->getAttribute('multiplier')
+			];
+		}
+
+		if($list)
+			$rateSections[] = ['title' => $sectionTitle, 'stages' => $list];
+	}
+}
+
+$twig->display('experience_stages.html.twig', [
+	'stages' => $stagesArray,
+	'sections' => $rateSections
+]);

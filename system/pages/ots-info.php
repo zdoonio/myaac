@@ -78,9 +78,50 @@ $clientVersion = NULL;
 if(isset($status['online']))
     $clientVersion = isset($status['clientVersion']) ? $status['clientVersion'] : null;
 
+// T317: skill and magic level narrow with level, so a single "x3" would be true
+// only at the start. The ladders come from data/XML/elysia_rates.xml, which
+// tools/seed_content.py writes straight from config.lua.
+$rateRanges = [];
+$ratesFile = $config['data_path'] . 'XML/elysia_rates.xml';
+if(file_exists($ratesFile)) {
+	$rates = new DOMDocument();
+	$rates->load($ratesFile);
+
+	foreach(['experience' => 'expRange', 'skill' => 'skillRange', 'magic' => 'magicRange'] as $nodeName => $varName) {
+		$node = $rates->getElementsByTagName($nodeName)->item(0);
+		if(!$node)
+			continue;
+
+		$multipliers = [];
+		foreach($node->getElementsByTagName('stage') as $stage) {
+			/** @var DOMElement $stage */
+			$multipliers[] = (float) $stage->getAttribute('multiplier');
+		}
+
+		if(count($multipliers) > 1)
+			$rateRanges[$varName] = 'x' . max($multipliers) . ' - x' . min($multipliers);
+	}
+}
+
+// T495: the connect address players actually type. config.lua `url` is an
+// upstream leftover (it pointed at otland.net) and `loginPort` is the local
+// port, while the public login lives on the playit tunnel (game.elysia.pl,
+// port 42694 - D151). Both come from settings, editable in the admin panel.
+$connectHost = setting('core.connect_host');
+if(!$connectHost)
+    $connectHost = str_replace('/', '', str_replace('http://', '', isset($config['lua']['url']) ? $config['lua']['url'] : ''));
+$connectPort = setting('core.connect_port');
+if(!$connectPort)
+    $connectPort = $config['lua']['loginPort'];
+
 $twig->display('serverinfo.html.twig', array(
+    'expRange' => isset($rateRanges['expRange']) ? $rateRanges['expRange'] : null,
+    'skillRange' => isset($rateRanges['skillRange']) ? $rateRanges['skillRange'] : null,
+    'magicRange' => isset($rateRanges['magicRange']) ? $rateRanges['magicRange'] : null,
     'experienceStages' => isset($config['lua']['experienceStages']) && getBoolean($config['lua']['experienceStages']) ? $config['lua']['experienceStages'] : null,
-    'serverIp' => str_replace('/', '', str_replace('http://', '', $config['lua']['url'])),
+    'serverIp' => $connectHost,
+    'connectHost' => $connectHost,
+    'connectPort' => $connectPort,
     'clientVersion' => $clientVersion,
     'globalSaveHour' => isset($config['lua']['globalSaveEnabled']) && getBoolean($config['lua']['globalSaveEnabled']) ? $config['lua']['globalSaveHour'] : null,
     'protectionLevel' => $config['lua']['protectionLevel'],

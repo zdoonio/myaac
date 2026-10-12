@@ -174,6 +174,15 @@ if (!isset($configDatabaseAutoMigrate) || $configDatabaseAutoMigrate) {
 $settings = Settings::getInstance();
 $settings->load();
 
+// The page code indexes $config['vocations'] by vocation id (spells, highscores,
+// characters), and the core.vocations setting exists for exactly that -- its own
+// description says "same order as in vocations.xml, starting with id: 0" -- but
+// nothing ever read it, so every one of those pages ran on an unset array.
+$vocationsNames = setting('core.vocations');
+if (is_array($vocationsNames) && count($vocationsNames) > 0) {
+	$config['vocations'] = $vocationsNames;
+}
+
 // csrf protection
 $token = getSession('csrf_token');
 if (!isset($token) || !$token) {

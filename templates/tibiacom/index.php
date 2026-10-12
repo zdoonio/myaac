@@ -436,7 +436,8 @@ foreach($config['menu_categories'] as $id => $cat) {
         </div>
         <div id="ThemeboxesColumn">
           <div id="RightArtwork">
-            <img id="Monster" src="images/monsters/<?php echo logo_monster() ?>.gif" onClick="window.location = '?subtopic=creatures&creature=<?php echo $config['logo_monster'] ?>';" alt="Monster of the Week" />
+            <?php $monsterOfTheWeek = monster_of_the_week(); ?>
+            <img id="Monster" src="images/monsters/<?php echo monster_of_the_week_file() ?><?php echo setting('core.monsters_images_extension') ?>" onClick="window.location = '<?php echo getMonsterLink($monsterOfTheWeek, false) ?>';" alt="Monster of the Week" />
             <img id="PedestalAndOnline" src="<?php echo $template_path; ?>/images/header/pedestal-and-online.gif" alt="Monster Pedestal and Players Online Box"/>
           <div id="PlayersOnline" onClick="window.location = '<?php echo getLink('online'); ?>'">
 		  <?php
@@ -472,8 +473,53 @@ foreach($config['menu_categories'] as $id => $cat) {
 </body>
 </html>
 <?php
-function logo_monster()
+/**
+ * The monster the server is boosting right now, by name.
+ *
+ * The game picks one a day and records which one in the global storage: key
+ * 90001 is an index into BOOSTED_MONSTER_LIST in
+ * data/lib/functions/boosted_list.lua, 90002 is the day it was picked. Reading
+ * both from here means the page shows what the players actually see, instead
+ * of a name somebody has to remember to update. Falls back to the configured
+ * logo_monster when the game has not written the storage yet.
+ */
+function monster_of_the_week()
 {
-	global $config;
-	return str_replace(" ", "", trim(strtolower($config['logo_monster'])));
+	global $db, $config;
+
+	static $name = null;
+	if ($name !== null) {
+		return $name;
+	}
+
+	$name = $config['logo_monster'];
+
+	$row = $db->query('SELECT `value` FROM `game_storage` WHERE `key` = 90001 LIMIT 1;')->fetch();
+	$index = $row ? (int)$row['value'] : 0;
+	$list = @file_get_contents(config('data_path') . 'lib/functions/boosted_list.lua');
+
+	if ($index > 0 && $list !== false) {
+		preg_match_all('/"([^"]+)"/', $list, $matches);
+		if (isset($matches[1][$index - 1])) {
+			$name = trim($matches[1][$index - 1]);
+		}
+	}
+
+	return $name;
+}
+
+/** The same monster as a file name: lower case, no spaces. */
+function monster_of_the_week_file()
+{
+	$name = str_replace(" ", "", trim(strtolower(monster_of_the_week())));
+	$extension = setting('core.monsters_images_extension');
+
+	// The portraits are generated from our own client files and carry whatever
+	// extension core.monsters_images_extension says, so follow the setting and
+	// fall back to the placeholder when that monster has no picture.
+	if (!file_exists(BASE . 'images/monsters/' . $name . $extension)) {
+		return 'nophoto';
+	}
+
+	return $name;
 }

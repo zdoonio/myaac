@@ -244,6 +244,26 @@
 			</tr>
 		</table>
 
+		{% if achievements is not empty %}
+		<!-- ACHIEVEMENTS -->
+		<br/>
+		<table border="0" cellspacing="1" cellpadding="4" width="100%">
+			<tr bgcolor="{{ config.vdarkborder }}">
+				<td colspan="3" class="white"><b>Achievements</b> &mdash; {{ achievements|length }} / {{ achievements_total }} unlocked, {{ achievements_points }} / {{ achievements_points_total }} points</td>
+			</tr>
+			{% set i = 0 %}
+			{% for achievement in achievements %}
+			<tr bgcolor="{{ getStyle(i) }}">
+				<td width="20" align="center">{{ achievement.grade }}</td>
+				<td>{{ achievement.name }}{% if achievement.secret %} <i>(secret)</i>{% endif %}</td>
+				<td width="80" align="right">{{ achievement.points }} pts</td>
+			</tr>
+			{% set i = i + 1 %}
+			{% endfor %}
+		</table>
+		<!-- ACHIEVEMENTS_END -->
+		{% endif %}
+
 		{{ hook('HOOK_CHARACTERS_BEFORE_DEATHS') }}
 
 		{% if deaths|length > 0 %}

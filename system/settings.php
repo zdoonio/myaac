@@ -55,6 +55,48 @@ return [
 			'default' => IS_CLI ? '' : $siteURL,
 			'is_config' => true,
 		],
+		'webclient_url' => [
+			'name' => 'Web Client URL',
+			'type' => 'text',
+			'desc' => 'Address of the browser client - the Downloads page links it as "Play in your browser"',
+			'default' => '',
+		],
+		'connect_host' => [
+			'name' => 'Connect Address',
+			'type' => 'text',
+			'desc' => 'Address players type in their client - the Server Info page shows it (game.elysia.pl)',
+			'default' => '',
+		],
+		'connect_port' => [
+			'name' => 'Connect Port',
+			'type' => 'text',
+			'desc' => 'Login port of the connect address (42694)',
+			'default' => '',
+		],
+		'discord_link' => [
+			'name' => 'Discord Invite',
+			'type' => 'text',
+			'desc' => 'Invite to our Discord - the Discord page, the client button and the in-game notice all read it (T491)',
+			'default' => '',
+		],
+		'discord_guild_id' => [
+			'name' => 'Discord Server ID',
+			'type' => 'text',
+			'desc' => 'Guild id of our Discord - the page embeds its widget and cacheinfo reads its online count (T491)',
+			'default' => '',
+		],
+		'discord_public_key' => [
+			'name' => 'Discord Public Key',
+			'type' => 'text',
+			'desc' => 'The app\'s Ed25519 public key (hex) - the slash-command endpoint verifies every request with it (T498)',
+			'default' => '',
+		],
+		'season_date' => [
+			'name' => 'Season Start',
+			'type' => 'text',
+			'desc' => 'Date of the new season (YYYY-MM-DD) - the /season command and the site copy read it (T498)',
+			'default' => '',
+		],
 		'env' => [
 			'name' => 'App Environment',
 			'type' => 'options',
@@ -147,7 +189,7 @@ return [
 			'name' => 'Meta Description',
 			'type' => 'textarea',
 			'desc' => 'description of the site in ' . escapeHtml('<meta>'),
-			'default' => (config('lua')['serverName'] ?? 'OTServ') . ' is a free massive multiplayer online role playing game (MMORPG).',
+			'default' => config('lua')['serverName'] . ' is a free massive multiplayer online role playing game (MMORPG).',
 		],
 		'meta_keywords' => [
 			'name' => 'Meta Keywords',
@@ -161,17 +203,29 @@ return [
 			'desc' => 'URL of the favicon used in the website',
 			'default' => '/images/favicon.png',
 		],
+		'meta_favicon_type' => [
+			'name' => 'Meta Favicon Type',
+			'type' => 'text',
+			'desc' => 'MIME type of the favicon used in the website',
+			'default' => 'image/png',
+		],
 		'meta_og_description' => [
 			'name' => 'Meta og:description',
 			'type' => 'textarea',
 			'desc' => 'Description used in Open Graph meta tags',
-			'default' => (config('lua')['serverName'] ?? 'OTServ') . ' is a free massive multiplayer online role playing game (MMORPG).',
+			'default' => config('lua')['serverName'] . ' is a free massive multiplayer online role playing game (MMORPG).',
 		],
 		'meta_og_image' => [
 			'name' => 'Meta og:image',
 			'type' => 'text',
 			'desc' => 'URL of the image used in Open Graph meta tags',
 			'default' => '/images/favicon.png',
+		],
+		'meta_og_image_type' => [
+			'name' => 'Meta og:image Type',
+			'type' => 'text',
+			'desc' => 'MIME type of the image used in Open Graph meta tags',
+			'default' => 'image/png',
 		],
 		'meta_og_image_dimensions' => [
 			'name' => 'Meta og:image Dimensions',
@@ -1575,6 +1629,15 @@ Sent by MyAAC,<br/>
 			'min' => 0,
 			'desc' => 'Leave empty to get automatically from config',
 			'default' => 7171,
+			'show_if' => [
+				'status_enabled', '=', 'true',
+			]
+		],
+		'status_proxy' => [
+			'name' => 'Status Proxy URL',
+			'type' => 'text',
+			'desc' => 'HTTP proxy URL for status checks (e.g. http://webproxy:7173). Leave empty to use direct TCP.',
+			'default' => '',
 			'show_if' => [
 				'status_enabled', '=', 'true',
 			]

@@ -21,6 +21,19 @@ class Monsters {
 	private static $lastError = '';
 
 	public static function loadFromXML($show = false) {
+		// Read the source BEFORE deleting anything: this distro defines monsters
+		// as Lua scripts (data/monsters/**), so the classic data/monster/ path
+		// below is missing here and the constructor throws. The old order
+		// emptied the table and only then failed, leaving the Monsters page
+		// blank -- one public hit on install/tools/7-finish.php was enough.
+		try {
+			self::$monstersList = new \OTS_MonstersList(config('data_path') . 'monster/');
+		}
+		catch(\Exception $e) {
+			self::$lastError = $e->getMessage();
+			return false;
+		}
+
 		try {
 			Monster::query()->delete();
 		} catch(\Exception $error) {}
@@ -28,14 +41,6 @@ class Monsters {
 		if($show) {
 			echo '<h2>Reload monsters.</h2>';
 			echo "<h2>All records deleted from table '" . TABLE_PREFIX . "monsters' in database.</h2>";
-		}
-
-		try {
-			self::$monstersList = new \OTS_MonstersList(config('data_path') . 'monster/');
-		}
-		catch(\Exception $e) {
-			self::$lastError = $e->getMessage();
-			return false;
 		}
 
 		$items = array();

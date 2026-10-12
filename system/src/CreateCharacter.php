@@ -3,6 +3,7 @@
 namespace MyAAC;
 
 use MyAAC\Models\Player;
+use MyAAC\Models\Town;
 
 /**
  * CreateCharacter
@@ -16,6 +17,14 @@ use MyAAC\Models\Player;
 
 class CreateCharacter
 {
+	/**
+	 * Town a character without a vocation starts in. Rookgaard is deliberately
+	 * absent from the towns list, so it can never be picked alongside a vocation:
+	 * a vocation character must not start there, and a vocationless one must not
+	 * start on the mainland.
+	 */
+	const ROOKGAARD_TOWN_ID = 3;
+
 	/**
 	 * @param $name
 	 * @param $errors
@@ -66,8 +75,12 @@ class CreateCharacter
 			$vocation = config('character_samples')[0];
 		}
 
+		// A vocationless character starts on Rookgaard, so the town pick is neither
+		// required nor validated for it — the choice is overridden below.
+		$rookgaard = ($vocation === 0);
+
 		if(count(config('character_towns')) > 1) {
-			if(!isset($town)) {
+			if(!$rookgaard && !isset($town)) {
 				$errors['town'] = 'Please select a town for your character.';
 			}
 		}
@@ -78,7 +91,7 @@ class CreateCharacter
 		if(empty($errors)) {
 			if(!isset(config('genders')[$sex]))
 				$errors['sex'] = 'Sex is invalid.';
-			if(!in_array($town, config('character_towns'), false))
+			if(!$rookgaard && !in_array($town, config('character_towns'), false))
 				$errors['town'] = 'Please select valid town.';
 			if(count(config('character_samples')) > 1)
 			{
@@ -92,6 +105,9 @@ class CreateCharacter
 			else
 				$vocation = 0;
 		}
+
+		if($rookgaard)
+			$town = self::ROOKGAARD_TOWN_ID;
 
 		return empty($errors);
 	}
@@ -185,9 +201,13 @@ class CreateCharacter
 		$player->setLookType($playerSample->getLookType());
 		$player->setCap($playerSample->getCap());
 		$player->setBalance(0);
-		$player->setPosX(0);
-		$player->setPosY(0);
-		$player->setPosZ(0);
+		// Start in the temple of the chosen town. Previously this was hardcoded to
+		// 0,0,0, which dropped every new character into the void regardless of the
+		// town picked. The sample is a fallback for a town missing from `towns`.
+		$townData = Town::find($town);
+		$player->setPosX($townData ? $townData->posx : $playerSample->getPosX());
+		$player->setPosY($townData ? $townData->posy : $playerSample->getPosY());
+		$player->setPosZ($townData ? $townData->posz : $playerSample->getPosZ());
 
 		if($db->hasColumn('players', 'stamina')) {
 			$player->setStamina($playerSample->getStamina());

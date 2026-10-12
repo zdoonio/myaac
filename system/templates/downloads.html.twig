@@ -1,0 +1,49 @@
+{% if errors|length > 0 %}
+	<div class="error" style="padding: 6px 8px; margin-bottom: 10px;">
+		{% for error in errors %}
+			{{ error }}<br/>
+		{% endfor %}
+	</div>
+{% endif %}
+
+<h3>Play in your browser</h3>
+{% if webclient_url %}
+	<p>
+		Nothing to install &mdash; the game runs straight in your browser:
+		<a href="{{ webclient_url }}">{{ webclient_url }}</a>
+	</p>
+{% else %}
+	<p>The web client address has not been configured yet.</p>
+{% endif %}
+
+<h3>Getting started</h3>
+<ul>
+	<li>Create an account in the Account menu &mdash; your first character is created together with it.</li>
+	<li>Open the web client above and log in.</li>
+	<li>The first launch downloads the game data (about 600 MB) into your browser storage; every later visit starts from it.</li>
+	<li>The client is our own Astra build, so every server feature works: rare monster icons, the market, the forge window and the wheel.</li>
+</ul>
+
+{% if builds|length > 0 %}
+	<h3>Desktop packages</h3>
+	<table border="0" cellspacing="1" cellpadding="4" width="100%">
+		<tr bgcolor="{{ config.vdarkborder }}">
+			<td width="30%"><span class="white"><b>Client</b></span></td>
+			<td width="15%"><span class="white"><b>Platform</b></span></td>
+			<td width="15%"><span class="white"><b>Size</b></span></td>
+			<td width="15%"><span class="white"><b>Date</b></span></td>
+			<td><span class="white"><b>Download</b></span></td>
+		</tr>
+		{% set i = 0 %}
+		{% for build in builds %}
+		<tr bgcolor="{{ getStyle(i) }}">
+			<td>{{ build.name }}</td>
+			<td>{{ build.platform|default('-') }}</td>
+			<td>{{ build.size }}</td>
+			<td>{{ build.date }}</td>
+			<td><a href="{{ build.url }}">download</a>{% if build.note is defined and build.note %} &mdash; {{ build.note }}{% endif %}</td>
+		</tr>
+		{% set i = i + 1 %}
+		{% endfor %}
+	</table>
+{% endif %}
