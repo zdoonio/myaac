@@ -61,6 +61,18 @@ return [
 			'desc' => 'Address of the browser client - the Downloads page links it as "Play in your browser"',
 			'default' => '',
 		],
+		'connect_host' => [
+			'name' => 'Connect Address',
+			'type' => 'text',
+			'desc' => 'Address players type in their client - the Server Info page shows it (game.elysia.pl)',
+			'default' => '',
+		],
+		'connect_port' => [
+			'name' => 'Connect Port',
+			'type' => 'text',
+			'desc' => 'Login port of the connect address (42694)',
+			'default' => '',
+		],
 		'env' => [
 			'name' => 'App Environment',
 			'type' => 'options',
