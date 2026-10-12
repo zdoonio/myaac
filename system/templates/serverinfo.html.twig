@@ -26,7 +26,9 @@
     {%  endif %}
 
     <h2>Rates</h2>
-    {%  if rateExp is defined %}
+    {%  if expRange %}
+    <li>Exp Rate: <b>{{ expRange }}</b> (stages, see the Exp Stages page)</li>
+    {%  elseif rateExp is defined %}
     <li>Exp Rate: <b>x{{ rateExp }}</b></li>
     {%  endif %}
     {%  if rateExpFromPlayers %}
