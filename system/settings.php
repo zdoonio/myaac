@@ -85,6 +85,18 @@ return [
 			'desc' => 'Guild id of our Discord - the page embeds its widget and cacheinfo reads its online count (T491)',
 			'default' => '',
 		],
+		'discord_public_key' => [
+			'name' => 'Discord Public Key',
+			'type' => 'text',
+			'desc' => 'The app\'s Ed25519 public key (hex) - the slash-command endpoint verifies every request with it (T498)',
+			'default' => '',
+		],
+		'season_date' => [
+			'name' => 'Season Start',
+			'type' => 'text',
+			'desc' => 'Date of the new season (YYYY-MM-DD) - the /season command and the site copy read it (T498)',
+			'default' => '',
+		],
 		'env' => [
 			'name' => 'App Environment',
 			'type' => 'options',
